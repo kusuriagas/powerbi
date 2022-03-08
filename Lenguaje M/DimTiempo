@@ -1,0 +1,27 @@
+let
+Source = List.Dates,
+#"Invoked FunctionSource" = Source(#date(2020, 6, 1), Duration.Days(DateTime.Date(DateTime.FixedLocalNow()) - #date(2020,1,1)), #duration(1, 0, 0, 0)),
+#"Table from List" = Table.FromList(#"Invoked FunctionSource", Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+#"Agregar Indice" = Table.AddIndexColumn(#"Table from List", "Index", 1, 1),
+#"Renamed Columns" = Table.RenameColumns(#"Agregar Indice",{{"Column1", "Date"}}),
+#"Agregar Col. Anio" = Table.AddColumn(#"Renamed Columns", "Year", each Date.Year([Date])),
+#"Agregar Col. Num. Mes" = Table.AddColumn(#"Agregar Col. Anio", "Month Number", each Date.Month([Date])),
+#"Agregar Col. Dia" = Table.AddColumn(#"Agregar Col. Num. Mes", "Day", each Date.Day([Date])),
+#"Agregar Nom. Dia" = Table.AddColumn(#"Agregar Col. Dia", "Day Name", each Date.ToText([Date],"ddd")),
+#"Agregar Nom. Mes" = Table.AddColumn(#"Agregar Nom. Dia", "Mes", each Date.ToText([Date],"MMM")),
+#"Reordered Columns" = Table.ReorderColumns(#"Agregar Nom. Mes",{"Date", "Index", "Year", "Month Number", "Mes", "Day", "Day Name"}),
+#"Agregar Cuarter Anio" = Table.AddColumn(#"Reordered Columns", "Quarter Number", each Date.QuarterOfYear([Date])),
+#"Duplicated Column" = Table.DuplicateColumn(#"Agregar Cuarter Anio", "Year", "Copy of Year"),
+#"Renamed Columns1" = Table.RenameColumns(#"Duplicated Column",{{"Copy of Year", "Short Year"}}),
+#"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns1",{{"Short Year", type text}}),
+#"Split Column by Position" = Table.SplitColumn(#"Changed Type","Short Year",Splitter.SplitTextByRepeatedLengths(2),{"Short Year.1", "Short Year.2"}),
+#"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Position",{{"Short Year.1", Int64.Type}, {"Short Year.2", Int64.Type}}),
+#"Removed Columns" = Table.RemoveColumns(#"Changed Type1",{"Short Year.1"}),
+#"Anio Corto" = Table.RenameColumns(#"Removed Columns",{{"Short Year.2", "Short Year"}}),
+Anio_Cuarter = Table.AddColumn(#"Anio Corto", "Quarter Year", each Number.ToText([Short Year]) & "Q" & Number.ToText([Quarter Number],"00")),
+#"Reordered Columns1" = Table.ReorderColumns(Anio_Cuarter,{"Index", "Date", "Day", "Day Name", "Month Number", "Mes", "Quarter Number", "Quarter Year", "Short Year", "Year"}),
+#"Anio a Numero" = Table.TransformColumnTypes(#"Reordered Columns1",{{"Date", type date}, {"Day", Int64.Type}, {"Index", Int64.Type}, {"Month Number", Int64.Type}, {"Quarter Number", Int64.Type}, {"Mes", type text}, {"Quarter Year", type text}, {"Year", Int64.Type}}),
+    #"Agregar dia-Mes" = Table.AddColumn(#"Anio a Numero", "FechaConFormato", each DateTime.ToText(DateTime.From([Date]),"dd-MMM")),
+    #"Added Custom" = Table.AddColumn(#"Agregar dia-Mes", "Agregar Num. Semana", each Date.WeekOfMonth([Date]))
+in
+    #"Added Custom"
