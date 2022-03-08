@@ -1,0 +1,1 @@
+ "Month Name", each Date.ToText(Date.From([FECHA_Y_HORA_ABIERTO]),"dd-MMM"), type text),
