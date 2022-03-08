@@ -14,3 +14,7 @@ SLA = Table.AddColumn(AGRU_SEM_IV, "SLA", each
             else if [ESTADO_DE_GESTION_1] = "INGRESADO" and Duration.TotalHours([FECHA_FIN_RG1]-[FECHA_INICIO])>=24 then ">24h"                           
             else  "-"),
 
+ "Month Name", each Date.ToText(Date.From([FECHA_Y_HORA_ABIERTO]),"dd-MMM"), type text),
+  Table.AddColumn(#"Inserted Month Name", "Length", each Text.Length([Month Name]), Int64.Type),
+Time.Hour([FECHA_Y_HORA_ABIERTO]) < 6 then "00AM-05AM "
+
