@@ -18,3 +18,4 @@ SLA = Table.AddColumn(AGRU_SEM_IV, "SLA", each
   Table.AddColumn(#"Inserted Month Name", "Length", each Text.Length([Month Name]), Int64.Type),
 Time.Hour([FECHA_Y_HORA_ABIERTO]) < 6 then "00AM-05AM "
 
+ cdni_2 = Table.AddColumn(#"Otras columnas quitadas", "cndi_2", each if Text.Length(Text.From(Text.Trim([cdni])))<=9 then Text.End(Text.Combine({"00000000",Text.From(Text.Trim([cdni]))}),8)
